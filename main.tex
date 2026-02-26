@@ -5,7 +5,9 @@
 \usepackage{hyperref}               
 \usepackage{graphicx}               
 \usepackage{float}                  
-\usepackage{titlesec}         
+\usepackage{titlesec}
+\usepackage{wrapfig}         
+\usepackage{subcaption}
 
 % Pengaturan Header dan Footer
 \pagestyle{fancy}
@@ -14,8 +16,6 @@
 \rhead{\textbf{NIM:} 25/566643/PPA/07139}     
 \lfoot{\textbf{Nama:} Khalilullah Al Faath}   
 \rfoot{\textbf{NIM:} 25/566643/PPA/07139}     
-% \lfoot{MII226401 - Kecerdasan Komputasional} 
-% \rfoot{Halaman \thepage}                     
 \renewcommand{\headrulewidth}{0.4pt}         
 \renewcommand{\footrulewidth}{0.4pt}         
 
@@ -26,5 +26,104 @@
     \large MII226401 Kecerdasan Komputasional dan Pembelajaran Mesin \\[0.5cm]
 \end{center}
 
+\section*{1. Tautan Kode (GitHub)}
+Kode sumber lengkap berupa \textit{Jupyter Notebook} untuk eksperimen ini dapat diakses pada repositori GitHub berikut: \\
+\url{https://github.com/khalilullahalfaath/KKPM---multi-layer-perceptron/blob/main/models/classification.ipynb}
+
+\section*{2. Penjelasan Eksperimen}
+
+\subsection*{2.1. Pemilihan Dataset}
+\begin{wrapfigure}{l}{0.5\textwidth}
+    \includegraphics[width=0.9\linewidth]{distribusi.png}
+    \caption{Distribusi kelas}
+    \label{fig:distribusi}
+\end{wrapfigure}
+Pada eksperimen ini, dataset yang digunakan adalah \textbf{Breast Cancer Wisconsin (Diagnostic)} yang diimpor menggunakan \textit{library} \texttt{ucimlrepo} dari \textit{UCI Machine Learning Repository}. Dataset ini berisi total 569 sampel data klinis tanpa adanya nilai yang hilang (\textit{null/missing values}) maupun data duplikat. Variabel target utamanya adalah \texttt{Diagnosis} yang membagi massa tumor ke dalam dua kelas, dengan distribusi sebagai berikut:
+
+\begin{itemize}
+    \item \textbf{\textit{Benign} (B - Jinak):} 357 sampel
+    \item \textbf{\textit{Malignant} (M - Ganas):} 212 sampel
+\end{itemize}
+
+\subsection*{2.2. Visualisasi Data}
+Pada tugas ini, visualisasi yang digunakan adalah heatmap correlation.
+
+\begin{figure}[H]
+    \begin{center}
+        \includegraphics[width=0.5\textwidth]{heatmap.png}
+        \caption{Visualisasi korelasi data}
+        \label{fig:figure2}
+    \end{center}
+\end{figure}
+
+
+\subsection*{2.3. Pra-pemrosesan Data (\textit{Data Preprocessing})}
+Sebelum dilatih menggunakan model \textit{Multilayer Perceptron} (MLP), data diproses melalui langkah-langkah berikut:
+\begin{itemize}
+    \item \textbf{\textit{Variabel Encoding}:} Target diubah ke dalam bentuk numerik, yaitu \texttt{'M'} menjadi 1 dan \texttt{'B'} menjadi 0.
+    \item \textbf{Pemisahan Data:} Perbandingan 75\%:25\%.
+    \item \textbf{Penskalaan Fitur (\textit{Feature Scaling}):} Karena nilai-nilai fitur memiliki rentang skala yang berbeda-beda, dilakukan standardisasi menggunakan \texttt{StandardScaler} agar nilai fitur berpusat di rata-rata 0 dengan variansi 1.
+\end{itemize}
+
+\subsection*{2.4. Arsitektur Model dan Hyperparameter}
+
+Eksperimen klasifikasi dilakukan menggunakan \texttt{MLPClassifier} dari pustaka \textit{scikit-learn}. Sebagai langkah awal, pengujian menggunakan \textit{basemodel} (tanpa modifikasi parameter dari dokumentasi bawaan \textit{scikit-learn}) berhasil memperoleh akurasi sebesar $0.986013986013986$. Berdasarkan eksperimen \textit{tuning} yang dilakukan setelahnya, diperoleh arsitektur dan \textit{hyperparameter} terbaik untuk dataset ini. Konfigurasi tersebut menggunakan konfigurasi sebagai berikut.
+\begin{verbatim}
+    mlp_clf_tuned = MLPClassifier(
+    hidden_layer_sizes=(100,),
+    alpha=1e-2,
+    activation='logistic',
+    solver='adam',
+    random_state=42
+)
+\end{verbatim}
+
+\section*{3. Hasil dan Analisis}
+
+\subsection*{3.1. Hasil Evaluasi Model}
+Setelah model dioptimalkan (\texttt{mlp\_clf\_tuned}) dan dilatih, evaluasi performa dilakukan secara komprehensif menggunakan data uji (\texttt{X\_Test\_Scaled} dan \texttt{y\_Test}) yang berjumlah 143 sampel. Berdasarkan hasil pengujian, model berhasil memperoleh \textbf{akurasi sebesar 99.30\%}. Berikut adalah rincian metrik evaluasi klasifikasi (\textit{Classification Report}) yang dihasilkan:
+
+\begin{table}[H]
+    \centering
+    \caption{Metrik Evaluasi Klasifikasi Data Uji}
+    \label{tab:classification_report}
+    \vspace{0.2cm}
+    \renewcommand{\arraystretch}{1.2}
+    \begin{tabular}{|l|c|c|c|c|}
+        \hline
+        \textbf{Kelas Target}        & \textbf{Precision}                   & \textbf{Recall} & \textbf{F1-Score} & \textbf{Support} \\ \hline
+        0 (\textit{Benign/Jinak})    & 0.9889                               & 1.0000          & 0.9944            & 89               \\ \hline
+        1 (\textit{Malignant/Ganas}) & 1.0000                               & 0.9815          & 0.9907            & 54               \\ \hline
+        \multicolumn{5}{|c|}{}                                                                                                       \\[-1em] \hline % Spacer
+        \textbf{Akurasi (Accuracy)}  & \multicolumn{3}{c|}{\textbf{0.9930}} & \textbf{143}                                           \\ \hline
+        \textbf{Macro Avg}           & 0.9944                               & 0.9907          & 0.9925            & 143              \\ \hline
+        \textbf{Weighted Avg}        & 0.9931                               & 0.9930          & 0.9930            & 143              \\ \hline
+    \end{tabular}
+\end{table}
+
+Berdasarkan hasil pada Tabel \ref{tab:classification_report}, model menunjukkan performa yang sangat luar biasa. Pada kelas \textit{Malignant} (ganas), model memiliki \textit{precision} sebesar 1.0000 (100\%), yang berarti tidak ada satupun tumor jinak yang salah diprediksi sebagai tumor ganas (\textit{False Positive} = 0). Sebaliknya, pada kelas \textit{Benign} (jinak), model mencapai nilai \textit{recall} sempurna sebesar 1.0000 (100\%), menandakan bahwa seluruh sampel tumor jinak berhasil diidentifikasi tanpa ada yang terlewat. Nilai rata-rata tertimbang (\textit{weighted average}) untuk F1-Score yang mencapai 0.9930 membuktikan bahwa model ini sangat andal dan stabil meskipun terdapat sedikit ketidakseimbangan jumlah kelas (89 jinak vs 54 ganas).
+
+\begin{figure}[h]
+
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=0.9\linewidth, height=6cm]{confusion.png}
+        \caption{Hasil confusion matrix}
+        \label{fig:confusion}
+    \end{subfigure}
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=0.9\linewidth, height=6cm]{loss.png}
+        \caption{Hasil loss curve}
+        \label{fig:loss}
+    \end{subfigure}
+
+    \caption{Hasil performa eksperimen hasil tuning}
+    \label{fig:performa}
+\end{figure}
+
+\subsection*{3.2. Analisis Eksperimen}
+Berdasarkan hasil akurasi sebesar 99.3\%, model MLP terbukti sangat efektif untuk tugas klasifikasi pada dataset \textit{Breast Cancer Wisconsin}.
+Penggunaan \textit{Feature Scaling} dengan \texttt{StandardScaler} memainkan peran penting di sini, karena algoritma berbasis jaringan saraf (seperti \textit{solver} \texttt{adam}) sangat sensitif terhadap skala fitur. Perbedaan skala data yang mencolok dapat memperlambat laju konvergensi dan menghasilkan performa yang suboptimal.
+
+Penerapan nilai regularisasi L2 (\texttt{alpha=0.01}) juga membantu menjaga agar bobot model tidak menjadi terlalu besar, sehingga meminimalisir kemungkinan terjadinya \textit{overfitting} meskipun model memiliki 100 neuron pada lapisan tersembunyinya. Fungsi aktivasi \texttt{logistic} sudah cukup mapan menangani data yang skalanya dinormalisasi, menghasilkan prediksi diagnosis yang sangat presisi dalam membedakan tumor jinak dan ganas.
 
 \end{document}
